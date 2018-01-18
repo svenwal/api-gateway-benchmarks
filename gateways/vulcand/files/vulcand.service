@@ -1,0 +1,18 @@
+[Unit]
+After=network.target
+After=etcd.service
+Requires=etcd.service
+
+[Service]
+ExecStart=/usr/bin/vulcand -etcd=http://localhost:2379 -etcdKey=/vulcand -sealKey=1b727a055500edd9ab826840ce9428dc8bace1c04addc67bbac6b096e25ede4b -statsdAddr=localhost:8125 -statsdPrefix=vulcan -logSeverity=INFO -port=8000
+ExecReload=/bin/kill -s HUP $MAINPID
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitCORE=infinity
+TasksMax=infinity
+TimeoutStartSec=0
+Delegate=yes
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

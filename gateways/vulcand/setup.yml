@@ -1,0 +1,114 @@
+- name: "Setup Vulcand"
+  hosts: all
+  vars:
+    proxy_env:
+      GOPATH: /usr/local/go
+  tasks:
+
+    - name: "Install golang with Centos repo for RHEL7"
+      yum: name="golang" enablerepo="centos7-base" state="installed"
+      when: ansible_distribution in ['RedHat'] and
+            ansible_distribution_major_version in ['7']
+
+    - name: "Ensure tools are installed"
+      yum: name="{{ item }}" state="installed"
+      with_items:
+        - "git"
+        - "golang"
+
+    - name: "Create directory structure"
+      file: path="{{ item }}" state="directory" mode="0777"
+      with_items:
+        - "/var/data/etcd"
+        - "/usr/local/go/src"
+        - "/usr/local/go/bin"
+
+    - name: "Ensure etcd is downloaded"
+      get_url: url="https://github.com/coreos/etcd/releases/download/v3.0.15/etcd-v3.0.15-linux-amd64.tar.gz"
+               dest="/tmp/etcd-v3.0.15-linux-amd64.tar.gz"
+               timeout=1800
+
+    - name: "Extract etcd"
+      unarchive: src=/tmp/etcd-v3.0.15-linux-amd64.tar.gz
+                 dest=/usr/local
+                 copy=no
+
+    - name: "Ensure the etcd user is present"
+      user: name="etcd" comment="etcd system user"
+            system="yes" state="present"
+
+    - name: Link the etcd binaries
+      file: src="/usr/local/etcd-v3.0.15-linux-amd64/{{ item }}" dest="/usr/bin/{{ item }}" state="link" force=yes
+      with_items:
+        - etcd
+        - etcdctl
+
+    - name: "Ensure etcd service script is present"
+      copy: src="files/etcd.service"
+            dest="/etc/systemd/system/etcd.service"
+            mode=444 owner=root group=root
+      notify:
+        - "Restart etcd"
+
+    - name: "Ensure etcd is running"
+      service: name="etcd" state="running" enabled="yes"
+
+    - name: "Setup test 01"
+      script: files/services.sh
+
+    - name: Add the Go bin directory to the PATH environment variable for all users
+      copy:
+        src: go-bin.sh
+        dest: /etc/profile.d
+
+    - name: Set GOPATH for all users
+      copy:
+        src: go-path.sh
+        dest: /etc/profile.d
+
+    - name: "Download and install Vulcand"
+      command: "/bin/go get -v github.com/vulcand/vulcand"
+      environment: "{{proxy_env}}"
+      args:
+        creates: "/usr/local/go/src/github.com/vulcand/vulcand/"
+
+    - name: "Download and install vctl"
+      command: "/bin/go install -v github.com/vulcand/vulcand/vctl"
+      environment: "{{proxy_env}}"
+
+    - name: "Download and install vbundle"
+      command: "/bin/go install -v github.com/vulcand/vulcand/vbundle"
+      environment: "{{proxy_env}}"
+
+    - name: Link the vulcand binaries
+      file: src="/usr/local/go/bin/{{ item }}" dest="/usr/bin/{{ item }}" state="link" force=yes
+      with_items:
+        - "vulcand"
+        - "vbundle"
+        - "vctl"
+
+    - name: "Ensure the vulcand user is present"
+      user: name="vulcand" comment="vulcand system user"
+            system="yes" state="present"
+
+    - name: "Ensure vulcand service script is present"
+      copy: src="files/vulcand.service"
+            dest="/etc/systemd/system/vulcand.service"
+            mode=444 owner=root group=root
+      notify:
+        - "Restart vulcand"
+
+    - name: "Ensure vulcand is running"
+      service: name="vulcand" state="running" enabled="yes"
+
+    - meta: flush_handlers
+
+    # - name: "Ensure vulcand is running"
+    #   service: name="vulcand" state="running" enabled="yes"
+
+  handlers:
+    - name: "Restart etcd"
+      service: name="etcd" state="restarted"
+
+    - name: "Restart vulcand"
+      service: name="vulcand" state="restarted"

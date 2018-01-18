@@ -1,0 +1,11 @@
+[Unit]
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/etcd --name alpha --data-dir /var/data/etcd
+ExecReload=/bin/kill -s HUP $MAINPID
+Delegate=yes
+KillMode=process
+
+[Install]
+WantedBy=default.target
