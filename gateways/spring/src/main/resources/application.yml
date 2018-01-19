@@ -1,0 +1,24 @@
+test:
+  hostport: httpbin.org:80
+#  hostport: localhost:5000
+  uri: http://${test.hostport}
+spring:
+  cloud:
+    gateway:
+      default-filters:
+      - AddResponseHeader=X-Response-Default-Foo, Default-Bar
+
+      routes:
+      # =====================================
+      - id: default_path_to_httpbin
+        uri: ${test.uri}
+        order: 10000
+        predicates:
+        - Path=/**
+  main.web-application-type: reactive
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.http.server.reactive: DEBUG
+    org.springframework.web.reactive: DEBUG
+    reactor.ipc.netty: DEBUG
