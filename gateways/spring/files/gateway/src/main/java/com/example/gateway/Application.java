@@ -24,9 +24,9 @@ public class Application {
 	@Bean
 	public RouteLocator customRouteLocator(RouteLocatorBuilder builder, ThrottleGatewayFilterFactory throttle) {
 		return builder.routes()
-				.route(r -> r.path("/test01").uri("http://localhost:8000/supu"))
+				.route(r -> r.path("/test01").uri("http://webserver:8888/test00"))
 
-				.route(r -> r.path("/supu").uri("http://localhost:8000/supu"))
+				.route(r -> r.path("/supu").uri("http://localhost:8888/supu"))
 
 				.route(r -> r.path("/image/webp").addResponseHeader("X-TestHeader", "baz").uri("http://httpbin.org:80"))
 
