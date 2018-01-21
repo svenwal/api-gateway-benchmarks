@@ -1,0 +1,63 @@
+{
+  "version": 2,
+  "host": [
+    "http://webserver:8888"
+  ],
+  "endpoints": [
+    {
+      "endpoint": "/test01",
+      "concurrent_calls": 1,
+      "backend": [
+        {
+          "url_pattern": "/test01"
+        }
+      ]
+    },
+    {
+      "endpoint": "/test02",
+      "concurrent_calls": 1,
+      "backend": [
+        {
+          "url_pattern": "/test02"
+        }
+      ]
+    },
+    {
+      "endpoint": "/test03",
+      "backend": [
+        {
+          "url_pattern": "/test03"
+        }
+      ],
+      "extra_config": {
+          "github.com/devopsfaith/krakend-ratelimit/juju/router": {
+              "maxRate": 1000000
+          }
+      }
+    },
+    {
+      "endpoint": "/test04",
+      "backend": [
+        {
+          "url_pattern": "/test04"
+        }
+      ],
+      "extra_config": {
+          "github.com/devopsfaith/krakend-ratelimit/juju/router": {
+              "maxRate": 1
+          }
+      }
+    }
+  ],
+  "port": 8000,
+  "cache_ttl": "5m",
+  "timeout": "5s",
+  "extra_config": {
+    "github_com/devopsfaith/krakend-gologging": {
+      "level":  "ERROR",
+      "prefix": "[KRAKEND]",
+      "syslog": false,
+      "stdout": false
+    }
+  }
+}

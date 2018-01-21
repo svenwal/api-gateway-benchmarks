@@ -1,0 +1,5 @@
+[krakend]
+name=DevopsFaith Repo for KrakenD
+baseurl=http://repo.krakend.io/rpm
+enabled=1
+gpgcheck=1
