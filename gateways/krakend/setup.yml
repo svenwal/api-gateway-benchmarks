@@ -1,0 +1,50 @@
+- name: "Setup KrakenD"
+  hosts: all
+  tasks:
+    - name: "Create directory structure"
+      file: path="{{ item }}" state="directory" mode="0755"
+      with_items:
+        - "/etc/krakend"
+
+    - name: "Ensure repository for KrakenD is present"
+      copy: src="files/krakend.repo"
+            dest="/etc/yum.repos.d/krakend.repo"
+            mode=444 owner=root group=root
+      notify:
+        - "Update the yum cache"
+
+    - name: "Ensure KrakenD RPM GPG key is installed"
+      rpm_key:
+        state: present
+        key: http://repo.krakend.io/rpm/RPM-GPG-KEY-krakend
+
+    - name: "Ensure KrakenD is installed with dependencies"
+      yum: name="{{ item }}" state="installed"
+      with_items:
+        - "krakend"
+
+    - name: "Ensure the krakend user is present"
+      user: name="krakend" comment="krakend system user"
+            system="yes" state="present"
+
+    - name: "KrakenD endpoints configuration"
+      copy: src="files/krakend.json"
+            dest="/etc/krakend/krakend-benchmark.json"
+            mode=444 owner=krakend group=root
+
+    - name: "Ensure krakend service script is present"
+      copy: src="files/krakend.service"
+            dest="/etc/systemd/system/krakend.service"
+            mode=444 owner=root group=root
+      notify:
+        - "Restart krakend"
+
+    - name: "Ensure krakend is running"
+      service: name="krakend" state="running" enabled="yes"
+
+  handlers:
+    - name: "Update the yum cache"
+      command: "yum clean metadata"
+
+    - name: "Restart krakend"
+      service: name="krakend" state="restarted"
