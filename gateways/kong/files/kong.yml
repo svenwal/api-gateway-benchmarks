@@ -33,14 +33,14 @@ admin_api_port: 8001
 dnsmasq_port: 8053
 
 ## Specify the DAO to use
-database: cassandra
+database: postgres
 
 ## Databases configuration
 databases_available:
-  cassandra:
+  psotgres:
     properties:
       contact_points:
-        - "localhost:9042"
+        - "localhost:5432"
       timeout: 1000
       keyspace: kong
       keepalive: 60000 # in milliseconds

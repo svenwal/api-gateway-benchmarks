@@ -45,7 +45,7 @@
         - "Restart Dummy-API"
 
     - name: "Ensure Dummy-API is running"
-      service: name="dummy-api" state="running" enabled="yes"
+      service: name="dummy-api" state="started" enabled="yes"
 
   handlers:
     - name: "Restart Dummy-API"

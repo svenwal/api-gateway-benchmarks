@@ -4,6 +4,7 @@
 which ansible-playbook 2>&1 > /dev/null
 if [ $? -ne 0 ]; then
         # Install Ansible if it's not 
+        yum install -y epel-release
         yum install -y ansible
 fi
 

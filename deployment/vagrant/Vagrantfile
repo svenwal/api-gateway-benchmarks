@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-def linux config, ip, box, hostname, box_url
+def linux config, ip, box, hostname
   config.vm.define hostname.to_sym do |c|
     # Give the VM a public or private IP address. PS: By default, the vagrant
     # images are not secure to expose as they allow login with known keys and 
@@ -24,7 +24,6 @@ def linux config, ip, box, hostname, box_url
       v.cpus = 1
     end
 
-    c.vm.box_url = box_url
     c.vm.box = box
     c.vm.hostname = '%s.local' % hostname.to_sym
     c.vm.boot_timeout = 900
@@ -45,7 +44,7 @@ end
 
 # hostname, ip, box, box_url, checksum
 Vagrant.configure('2') do |config|
-  linux config, '10.11.12.20', 'varnish/centos-7-amd64', 'consumer', 'https://images.varnish-software.com/vagrant/centos-7-amd64.json'
-  linux config, '10.11.12.21', 'varnish/centos-7-amd64', 'gateway', 'https://images.varnish-software.com/vagrant/centos-7-amd64.json'
-  linux config, '10.11.12.22', 'varnish/centos-7-amd64', 'webserver', 'https://images.varnish-software.com/vagrant/centos-7-amd64.json'
+  linux config, '10.11.12.20', 'centos/7', 'consumer'
+  linux config, '10.11.12.21', 'centos/7', 'gateway'
+  linux config, '10.11.12.22', 'centos/7', 'webserver'
 end

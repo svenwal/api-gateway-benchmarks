@@ -6,36 +6,19 @@
       with_items:
         - "createrepo"
         - "nmap-ncat"
+        - "wget"
 
     - name: "Create directory structure"
       file: path="{{ item }}" state="directory" mode="0755"
       with_items:
         - "/var/lib/packages"
 
-    - name: "Ensure repository for Cassandra is present"
-      copy: src="files/cassandra.repo"
-            dest="/etc/yum.repos.d/cassandra.repo"
-            mode=444 owner=root group=root
-      notify:
-        - "Update the yum cache"
-
-    - name: "Ensure Cassandra is installed with dependencies"
+    - name: "Ensure Postgres is installed with dependencies"
       yum: name="{{ item }}" state="installed"
       with_items:
-        - "dsc21"
-        - "java-1.8.0-openjdk"
-
-    - name: "Ensure Cassandra is configured"
-      copy: src="files/cassandra.yaml"
-            dest="/etc/cassandra/default.conf/cassandra.yaml"
-            mode=444 owner=root group=root
-      notify:
-        - "Restart Cassandra"
+        - "postgresql-server"
+        - "postgresql-contrib"
     
-    - name: "Ensure Cassandra is running"
-      service: name="cassandra" state="running" enabled="yes"
-      notify:
-        - "Wait for Cassandra to start listening"
 
     - name: "Ensure repository for Kong is present"
       copy: src="files/kong.repo"
@@ -45,7 +28,7 @@
         - "Update the yum cache"
 
     - name: "Ensure Kong is downloaded"
-      command: "wget -O /var/lib/packages/kong.rpm https://github.com/Mashape/kong/releases/download/0.5.3/kong-0.5.3.el7.noarch.rpm"
+      command: "wget -O /var/lib/packages/kong.rpm https://github.com/Kong/kong/releases/download/0.5.3/kong-0.5.3.el7.noarch.rpm"
       args:
         creates: "/var/lib/packages/kong.rpm"
       notify:
@@ -86,11 +69,11 @@
     - name: "Update local repository"
       command: "/usr/bin/createrepo /var/lib/packages"
     
-    - name: "Restart Cassandra"
-      service: name="cassandra" state="restarted"
+    - name: "Restart Postgres"
+      service: name="postgres" state="restarted"
 
-    - name: "Wait for Cassandra to start listening"
-      script: files/waitforcassandra.sh
+    - name: "Wait for Postgres to start listening"
+      script: files/postgres.sh
 
     - name: "Restart Kong"
       service: name="kong" state="restarted"

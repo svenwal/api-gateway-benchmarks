@@ -1,8 +1,8 @@
 [Unit]
 Description=Kong API Gateway
 After=network.target
-After=cassandra.service
-Requires=cassandra.service
+After=postgresql.service
+Requires=postgresql.service
 
 [Service]
 ExecStart=/usr/local/bin/kong start
